@@ -1,7 +1,6 @@
 package netology.service;
 
 import netology.repository.PostRepository;
-import netology.repository.PostRepositoryStubImpl;
 import org.springframework.stereotype.Service;
 import netology.exception.NotFoundException;
 import netology.model.Post;

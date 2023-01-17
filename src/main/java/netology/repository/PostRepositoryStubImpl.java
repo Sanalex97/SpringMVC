@@ -1,8 +1,11 @@
 package netology.repository;
 
 
+import netology.exception.NotFoundException;
 import netology.model.Post;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,11 @@ public class PostRepositoryStubImpl implements PostRepository {
 
         for (long k :
                 posts.keySet()) {
+
+            if (posts.get(k).isRemoved()) {
+                continue;
+            }
+
             postList.add(posts.get(k));
         }
 
@@ -31,16 +39,24 @@ public class PostRepositoryStubImpl implements PostRepository {
     @Override
     public Optional<Post> getById(long id) {
         System.out.println("ID " + id);
+
+        if (posts.get(id).isRemoved()) {
+            throw new NotFoundException();
+        }
+
         return Optional.ofNullable(posts.get(id));
     }
 
     @Override
     public Post save(Post post) {
         long id;
+
         if (post.getId() == 0) {
             id = count.getAndIncrement();
             post.setId(id);
             posts.put(id, post);
+        } else if (post.isRemoved()) {
+            throw new NotFoundException();
         } else {
             if (post.getId() > count.get()) {
                 //todo отпарвить сообщение клиенту, что пост сохранен с другим id
@@ -58,7 +74,8 @@ public class PostRepositoryStubImpl implements PostRepository {
     public void removeById(long id) {
         Post post = posts.get(id);
         if (post != null) {
-            posts.remove(id);
+            //posts.remove(id);
+            post.setRemoved(true);
         }
     }
 }
